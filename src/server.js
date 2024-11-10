@@ -15,7 +15,8 @@ app.get('/', (req, res) => {
       version: '1.0.0'
     });
   });
-// app.use('/api/ussd', require('./routes/ussd'));
+  
+app.use('/api/ussd', require('./routes/ussd'));
 app.use('/api/sms', require('./routes/sms'));
 app.use('/api/subscriptions', require('./routes/subscription'));
 
