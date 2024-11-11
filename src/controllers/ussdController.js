@@ -2,8 +2,8 @@
 require('dotenv').config();
 
 exports.handleUssd = async (req, res) => {
+  console.log('Received USSD request:', req, req.body);
   const { messageType, msisdn, serviceCode, ussdString } = req.body;
-  console.log('Received USSD request:', req.body);
   let response = {
     messageType: messageType,
     msisdn: msisdn,
