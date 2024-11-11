@@ -13,11 +13,11 @@ exports.handleUssd = async (req, res) => {
     return res.status(400).send('END Invalid request parameters');
   }
 
-    // Add service code validation at the start
-  if (serviceCode !== process.env.SERVICE_CODE) {
-    console.log('Invalid service code:', serviceCode);
-    return res.status(403).send('END Invalid service code');
-  }
+  //   // Add service code validation at the start
+  // if (serviceCode !== process.env.SERVICE_CODE) {
+  //   console.log('Invalid service code:', serviceCode);
+  //   return res.status(403).send('END Invalid service code');
+  // }
 
   try {
     // // Rate limiting check
