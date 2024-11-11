@@ -2,253 +2,167 @@
 require('dotenv').config();
 
 exports.handleUssd = async (req, res) => {
-  console.log('Received USSD request:', req, req.body);
-  const { messageType, msisdn, serviceCode, ussdString } = req.body;
-  let response = {
-    messageType: messageType,
-    msisdn: msisdn,
-    serviceCode: serviceCode,
-    ussdString: ''
-  };
+  
+  const { sessionId, serviceCode, phoneNumber, text } = req.body;
+  console.log('USSD callback body:', req.body);
+  let response = '';
+  const number = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Input validation
+  if (!phoneNumber || !sessionId) {
+    console.log('Missing required parameters:', { phoneNumber, sessionId });
+    return res.status(400).send('END Invalid request parameters');
+  }
+
+  //   // Add service code validation at the start
+  // if (serviceCode !== process.env.SERVICE_CODE) {
+  //   console.log('Invalid service code:', serviceCode);
+  //   return res.status(403).send('END Invalid service code');
+  // }
 
   try {
-    // // Validate service code
-    // if (serviceCode !== process.env.SERVICE_CODE) {
-    //   response.messageType = 2;
-    //   response.ussdString = "Invalid service code.";
-    //   return res.json(response);
+    // // Rate limiting check
+    // const isRateLimited = await checkRateLimit(phoneNumber);
+    // if (isRateLimited) {
+    //   console.log('Rate limit exceeded for:', phoneNumber);
+    //   return res.send('END Please try again after 1 minute');
     // }
 
-    // Initial session
-    if (messageType === 0) {
-      response.messageType = 1;
-      response.ussdString = `Hello`;
-      console.log("USSD Response:", response);
-      return res.json(response);
-    }
+    // // Session timeout check
+    // const isSessionValid = await checkSessionValidity(sessionId);
+    // if (!isSessionValid) {
+    //   console.log('Session expired for:', sessionId);
+    //   return res.send('END Session expired. Please dial again');
+    // }
 
-    // Continue session
-    if (messageType === 1) {
-      switch(ussdString) {
-        case '1':
-          response.ussdString = `Choose your game:\n1. Guess the number\n2. Rock, Paper, Scissors\n3. Quick Math\n4. Back\n\nSelect an option:`;
+    if (text === '') {
+      response = `CON Welcome to Fun Test Menu! 🎮
+      1. Play a Game
+      2. Tell me a Joke
+      3. Daily Quote
+      4. Exit`;
+    } else {
+      const textArray = text.split('*');
+      const level = textArray.length;
+
+      // Validate input format
+      if (!textArray.every(input => /^[1-4]$/.test(input))) {
+        console.log('Invalid input received:', text);
+        return res.send('END Invalid input. Please use numbers 1-4');
+      }
+
+      switch(level) {
+        case 1:
+          switch(textArray[0]) {
+            case '1':
+              response = `CON Choose your game:
+              1. Guess the number
+              2. Rock, Paper, Scissors
+              3. Quick Math
+              4. Back to main menu`;
+              break;
+            case '2':
+              await logUserChoice(phoneNumber, 'joke');
+              response = 'END Why did the developer go broke? Because he used up all his cache! 😄';
+              break;
+            case '3':
+              await logUserChoice(phoneNumber, 'quote');
+              response = 'END "Be the change you wish to see in the world" - Gandhi';
+              break;
+            case '4':
+              await logUserChoice(phoneNumber, 'exit');
+              response = 'END Thanks for testing! Come back soon! 👋';
+              break;
+            default:
+              response = 'END Invalid selection. Please try again';
+          }
           break;
-        case '2':
-          response.messageType = 2;
-          response.ussdString = "Why did the developer go broke? Because he used up all his cache! ";
-          break;
-        case '3':
-          response.messageType = 2;
-          response.ussdString = '"Be the change you wish to see in the world" - Gandhi';
-          break;
-        case '4':
-          response.messageType = 4;
-          response.ussdString = "Session has been cancelled.";
-          break;
-        case '1*1':
-          response.messageType = 2;
-          response.ussdString = "I'm thinking of number 7! Did you guess it? ";
-          break;
-        case '1*2':
-          response.messageType = 2;
-          response.ussdString = "Paper beats Rock! I win! ";
-          break;
-        case '1*3':
-          response.messageType = 2;
-          response.ussdString = "Quick Math: 2 + 2 = 4, minus 1 that's 3! ";
+        case 2:
+          if (textArray[0] === '1') {
+            switch(textArray[1]) {
+              case '1':
+                await logUserChoice(phoneNumber, 'number_game');
+                response = `END I\'m thinking of number 7 Did you guess it? 🎲`;
+                break;
+              case '2':
+                await logUserChoice(phoneNumber, 'rps_game');
+                response = 'END Paper beats Rock! I win! 🎮';
+                break;
+              case '3':
+                await logUserChoice(phoneNumber, 'math_game');
+                response = 'END Quick Math: 2 + 2 = 4, minus 1 that\'s 3! 🧮';
+                break;
+              case '4':
+                response = `CON Welcome back to main menu:
+                1. Play a Game
+                2. Tell me a Joke
+                3. Daily Quote
+                4. Exit`;
+                break;
+              default:
+                response = 'END Invalid game selection';
+            }
+          }
           break;
         default:
-          response.messageType = 2;
-          response.ussdString = "Invalid option selected.";
+          response = 'END Menu depth exceeded. Please start over';
       }
-      console.log("USSD Response:", response);
-      return res.json(response);
     }
 
+    // Log successful interaction
+    await logUssdInteraction(sessionId, phoneNumber, text, response);
+
   } catch (error) {
-    console.error('USSD Error:', error);
-    response.messageType = 5;
-    response.ussdString = "Timeout.";
-    return res.json(response);
+    console.log('USSD Error:', {
+      error: error.message,
+      phoneNumber,
+      sessionId,
+      text
+    });
+    response = 'END System error. Please try again later';
+    
+    // Alert monitoring system
+    await alertSystemError(error, phoneNumber);
+  }
+
+  // Set response headers
+  res.set({
+    'Content-Type': 'text/plain',
+    'Cache-Control': 'no-cache',
+    'X-Session-ID': sessionId
+  });
+
+  // Send response with retry mechanism
+  try {
+    res.send(response);
+  } catch (sendError) {
+    console.log('Response send error:', sendError);
+    res.status(500).send('END Service temporarily unavailable');
   }
 };
 
-// exports.handleUssd = async (req, res) => {
-//   const { messageType, msisdn, serviceCode, ussdString } = req.body;
-//   let response = {
-//     messageType: messageType,
-//     msisdn: msisdn,
-//     serviceCode: serviceCode,
-//     ussdString: ''
-//   };
-
-//   try {
-//     if (serviceCode !== process.env.SERVICE_CODE) {
-//       response.messageType = 2;
-//       response.ussdString = "Invalid service code.";
-//       return res.json(response);
-//     }
-
-//     // Initial session - Main Menu
-//     if (messageType === 0) {
-//       response.messageType = 1;
-//       response.ussdString = `Welcome to Interactive Menu! 🌟\n
-// 1. Games Zone 🎮
-// 2. Daily Entertainment 🎯
-// 3. Knowledge Hub 📚
-// 4. Fun Tools 🛠
-// 5. Exit ❌\n
-// Select an option:`;
-//       return res.json(response);
-//     }
-
-//     // Continue session
-//     if (messageType === 1) {
-//       switch(ussdString) {
-//         // Games Zone
-//         case '1':
-//           response.ussdString = `Games Zone 🎮\n
-// 1. Number Guessing
-// 2. Word Scramble
-// 3. Trivia Quiz
-// 4. Rock Paper Scissors
-// 5. Back\n
-// Select a game:`;
-//           break;
-
-//         // Daily Entertainment
-//         case '2':
-//           response.ussdString = `Daily Entertainment 🎯\n
-// 1. Random Joke
-// 2. Fun Facts
-// 3. Daily Riddle
-// 4. Lucky Number
-// 5. Back\n
-// Choose option:`;
-//           break;
-
-//         // Knowledge Hub
-//         case '3':
-//           response.ussdString = `Knowledge Hub 📚\n
-// 1. Quote of the Day
-// 2. Did You Know?
-// 3. Word of the Day
-// 4. History Fact
-// 5. Back\n
-// Select topic:`;
-//           break;
-
-//         // Fun Tools
-//         case '4':
-//           response.ussdString = `Fun Tools 🛠\n
-// 1. Random Name Generator
-// 2. Fortune Cookie
-// 3. Magic 8 Ball
-// 4. Coin Flip
-// 5. Back\n
-// Pick a tool:`;
-//           break;
-
-//         // Games Zone Submenus
-//         case '1*1':
-//           const randomNum = Math.floor(Math.random() * 10) + 1;
-//           response.messageType = 2;
-//           response.ussdString = `I'm thinking of a number between 1-10! It's ${randomNum} 🎲`;
-//           break;
-
-//         case '1*2':
-//           const words = ['HELLO', 'WORLD', 'GAMES', 'PHONE', 'USSD'];
-//           const word = words[Math.floor(Math.random() * words.length)];
-//           const scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
-//           response.messageType = 2;
-//           response.ussdString = `Unscramble this: ${scrambled}\nAnswer: ${word}`;
-//           break;
-
-//         // Daily Entertainment Submenus
-//         case '2*1':
-//           const jokes = [
-//             "Why don't programmers like nature? It has too many bugs! 🐛",
-//             "What's a computer's favorite snack? Microchips! 🍪",
-//             "Why did the developer go broke? Because he used up all his cache! 💰",
-//             "What do you call a bear with no teeth? A gummy bear! 🐻"
-//           ];
-//           response.messageType = 2;
-//           response.ussdString = jokes[Math.floor(Math.random() * jokes.length)];
-//           break;
-
-//         // Knowledge Hub Submenus
-//         case '3*1':
-//           const quotes = [
-//             '"Be the change" - Gandhi',
-//             '"Think different" - Steve Jobs',
-//             '"Just do it" - Nike',
-//             '"Dream big" - Walt Disney'
-//           ];
-//           response.messageType = 2;
-//           response.ussdString = quotes[Math.floor(Math.random() * quotes.length)];
-//           break;
-
-//         // Fun Tools Submenus
-//         case '4*3':
-//           const answers = [
-//             "Yes definitely! ✅",
-//             "Not likely ❌",
-//             "Maybe later 🤔",
-//             "Ask again 🔄",
-//             "Without a doubt! ⭐"
-//           ];
-//           response.messageType = 2;
-//           response.ussdString = `Magic 8 Ball says: ${answers[Math.floor(Math.random() * answers.length)]}`;
-//           break;
-
-//         case '4*4':
-//           response.messageType = 2;
-//           response.ussdString = `Coin flip result: ${Math.random() < 0.5 ? 'Heads! 🪙' : 'Tails! 🪙'}`;
-//           break;
-
-//         case '5':
-//           response.messageType = 4;
-//           response.ussdString = "Thanks for playing! Come back soon! 👋";
-//           break;
-
-//         default:
-//           response.messageType = 2;
-//           response.ussdString = "Invalid selection. Please try again! 🔄";
-//       }
-//       return res.json(response);
-//     }
-
-//   } catch (error) {
-//     console.error('USSD Error:', error);
-//     response.messageType = 5;
-//     response.ussdString = "Session timeout. Please try again! ⏱️";
-//     return res.json(response);
-//   }
-// };
-
-
 // // Helper functions
-// async function checkRateLimit(msisdn) {
+// async function checkRateLimit(phoneNumber) {
 //   // Implement rate limiting logic
 //   return false;
 // }
 
-// async function checkSessionValidity() {
+// async function checkSessionValidity(sessionId) {
 //   // Implement session validation logic
 //   return true;
 // }
 
-async function logUserChoice(msisdn, choice) {
+async function logUserChoice(phoneNumber, choice) {
   // Implement user choice logging
-  console.log('User choice:', { msisdn, choice });
+  console.log('User choice:', { phoneNumber, choice });
 }
 
-async function logUssdInteraction(serviceCode, msisdn, input, output) {
+async function logUssdInteraction(sessionId, phoneNumber, input, output) {
   // Implement interaction logging
-  console.log('USSD Interaction:', { serviceCode, msisdn, input, output });
+  console.log('USSD Interaction:', { sessionId, phoneNumber, input, output });
 }
 
-async function alertSystemError(error, msisdn) {
+async function alertSystemError(error, phoneNumber) {
   // Implement error alerting system
-  console.log('System Alert:', { error, msisdn });
+  console.log('System Alert:', { error, phoneNumber });
 }
