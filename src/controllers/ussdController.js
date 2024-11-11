@@ -21,15 +21,15 @@ exports.handleUssd = async (req, res) => {
     // }
 
     // Initial session
-    if (messageType == 0) {
-      response.messageType = 0
+    if (messageType == 0 || messageType == "0") {
+      response.messageType = "0"
       response.ussdString = `Hello`;
       console.log("USSD Response:", response);
       return res.json(response);
     }
 
     // Continue session
-    if (messageType === 0) {
+    if (messageType === "0") {
       switch(ussdString) {
         case '1':
           response.ussdString = `Choose your game:\n1. Guess the number\n2. Rock, Paper, Scissors\n3. Quick Math\n4. Back\n\nSelect an option:`;
