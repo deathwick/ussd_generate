@@ -22,7 +22,7 @@ exports.handleUssd = async (req, res) => {
     // Initial session
     if (messageType === 0) {
       response.messageType = 1;
-      response.ussdString = `Welcome to Fun Test Menu! \n1. Play a Game\n2. Tell me a Joke\n3. Daily Quote\n4. Exit\n\nSelect an option:`;
+      response.ussdString = `Welcome to Fun Test Menu! \n1. Play a Game\n Exit\n\nSelect an option:`;
       console.log("USSD Response:", response);
       return res.json(response);
     }
