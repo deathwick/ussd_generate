@@ -23,7 +23,7 @@ exports.handleUssd = async (req, res) => {
     // Initial session
     if (messageType == 0) {
       response.messageType = 1;
-      response.ussdString = `Hello`;
+      response.ussdString = `Welcome To`;
       console.log('-----------USSD Response ---------');
       console.log("USSD Response:", response);
       return res.json(response);
@@ -239,4 +239,3 @@ exports.handleUssd = async (req, res) => {
 //   // Implement session validation logic
 //   return true;
 // }
-
