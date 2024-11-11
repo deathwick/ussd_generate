@@ -3,6 +3,7 @@ require('dotenv').config();
 
 exports.handleUssd = async (req, res) => {
   const { messageType, msisdn, serviceCode, ussdString } = req.body;
+  console.log('Received USSD request:', req.body);
   let response = {
     messageType: messageType,
     msisdn: msisdn,
@@ -22,6 +23,7 @@ exports.handleUssd = async (req, res) => {
     if (messageType === 0) {
       response.messageType = 1;
       response.ussdString = `Welcome to Fun Test Menu! 🎮\n1. Play a Game\n2. Tell me a Joke\n3. Daily Quote\n4. Exit\n\nSelect an option:`;
+      console.log("USSD Response:", response);
       return res.json(response);
     }
 
