@@ -35,7 +35,7 @@ exports.handleUssd = async (req, res) => {
           break;
         case '2':
           response.messageType = 2;
-          response.ussdString = "Why did the developer go broke? Because he used up all his cache! 😄";
+          response.ussdString = "Why did the developer go broke? Because he used up all his cache! ";
           break;
         case '3':
           response.messageType = 2;
@@ -47,15 +47,15 @@ exports.handleUssd = async (req, res) => {
           break;
         case '1*1':
           response.messageType = 2;
-          response.ussdString = "I'm thinking of number 7! Did you guess it? 🎲";
+          response.ussdString = "I'm thinking of number 7! Did you guess it? ";
           break;
         case '1*2':
           response.messageType = 2;
-          response.ussdString = "Paper beats Rock! I win! 🎮";
+          response.ussdString = "Paper beats Rock! I win! ";
           break;
         case '1*3':
           response.messageType = 2;
-          response.ussdString = "Quick Math: 2 + 2 = 4, minus 1 that's 3! 🧮";
+          response.ussdString = "Quick Math: 2 + 2 = 4, minus 1 that's 3! ";
           break;
         default:
           response.messageType = 2;
