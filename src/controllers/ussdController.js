@@ -5,6 +5,7 @@ exports.handleUssd = async (req, res) => {
   const { sessionId, serviceCode, phoneNumber, text } = req.body;
   console.log('USSD callback body:', req.body);
   let response = '';
+  const number = Math.floor(100000 + Math.random() * 900000).toString();
 
   // Input validation
   if (!phoneNumber || !sessionId) {
@@ -80,7 +81,7 @@ exports.handleUssd = async (req, res) => {
             switch(textArray[1]) {
               case '1':
                 await logUserChoice(phoneNumber, 'number_game');
-                response = 'END I\'m thinking of number 7! Did you guess it? 🎲';
+                response = `END I\'m thinking of number 7 Did you guess it? 🎲`;
                 break;
               case '2':
                 await logUserChoice(phoneNumber, 'rps_game');

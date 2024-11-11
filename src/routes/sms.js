@@ -1,7 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const { handleSms } = require('../controllers/smsController');
+// const express = require('express');
+// const router = express.Router();
+// const { handleSms } = require('../controllers/smsController');
 
-router.post('/', handleSms);
+// router.post('/', handleSms);
 
-module.exports = router;
+// module.exports = router;

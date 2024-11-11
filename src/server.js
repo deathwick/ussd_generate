@@ -17,8 +17,8 @@ app.get('/', (req, res) => {
   });
   
 app.use('/api/ussd', require('./routes/ussd'));
-app.use('/api/sms', require('./routes/sms'));
-app.use('/api/subscriptions', require('./routes/subscription'));
+// app.use('/api/sms', require('./routes/sms'));
+// app.use('/api/subscriptions', require('./routes/subscription'));
 
 const PORT = process.env.PORT || 6000;
 
