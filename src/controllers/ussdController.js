@@ -1,8 +1,9 @@
 // const logger = require('../utils/logger');
-require('dotenv').config();
+
 
 exports.handleUssd = async (req, res) => {
   console.log('Received USSD request:', req.body);
+  console.log('-----------Received USSD ---------');
   const { messageType, msisdn, serviceCode, ussdString } = req.body;
   let response = {
     messageType: messageType,
@@ -20,15 +21,15 @@ exports.handleUssd = async (req, res) => {
     // }
 
     // Initial session
-    if (messageType === 0) {
-      response.messageType = 1;
+    if (messageType == 0) {
+      response.messageType = 0
       response.ussdString = `Hello`;
       console.log("USSD Response:", response);
       return res.json(response);
     }
 
     // Continue session
-    if (messageType === 1) {
+    if (messageType === 0) {
       switch(ussdString) {
         case '1':
           response.ussdString = `Choose your game:\n1. Guess the number\n2. Rock, Paper, Scissors\n3. Quick Math\n4. Back\n\nSelect an option:`;
@@ -238,17 +239,3 @@ exports.handleUssd = async (req, res) => {
 //   return true;
 // }
 
-async function logUserChoice(msisdn, choice) {
-  // Implement user choice logging
-  console.log('User choice:', { msisdn, choice });
-}
-
-async function logUssdInteraction(serviceCode, msisdn, input, output) {
-  // Implement interaction logging
-  console.log('USSD Interaction:', { serviceCode, msisdn, input, output });
-}
-
-async function alertSystemError(error, msisdn) {
-  // Implement error alerting system
-  console.log('System Alert:', { error, msisdn });
-}

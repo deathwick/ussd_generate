@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const sequelize  = require('../config/sequelize');
-const logger = require('./utils/logger');
+// const sequelize  = require('../config/sequelize');
+// const logger = require('./utils/logger');
 
 const app = express();
 app.use(express.json());
