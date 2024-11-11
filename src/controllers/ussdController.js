@@ -61,6 +61,7 @@ exports.handleUssd = async (req, res) => {
           response.messageType = 2;
           response.ussdString = "Invalid option selected.";
       }
+      console.log("USSD Response:", response);
       return res.json(response);
     }
 
