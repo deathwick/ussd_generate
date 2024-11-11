@@ -2,14 +2,20 @@
 require('dotenv').config();
 
 exports.handleUssd = async (req, res) => {
-  const { sessionId, serviceCode, phoneNumber, text } = req.body;
+  // {
+  //   "messageType": 0,
+  //   "msisdn": "2348165661377",
+  //   "serviceCode": "44004",
+  //   "ussdString": "44004"
+  // }
+  const { serviceCode, msisdn, text } = req.body;
   console.log('USSD callback body:', req.body);
   let response = '';
   const number = Math.floor(100000 + Math.random() * 900000).toString();
 
   // Input validation
-  if (!phoneNumber || !sessionId) {
-    console.log('Missing required parameters:', { phoneNumber, sessionId });
+  if (!msisdn || !serviceCode) {
+    console.log('Missing required parameters:', { msisdn, serviceCode });
     return res.status(400).send('END Invalid request parameters');
   }
 
@@ -21,16 +27,16 @@ exports.handleUssd = async (req, res) => {
 
   try {
     // // Rate limiting check
-    // const isRateLimited = await checkRateLimit(phoneNumber);
+    // const isRateLimited = await checkRateLimit(msisdn);
     // if (isRateLimited) {
-    //   console.log('Rate limit exceeded for:', phoneNumber);
+    //   console.log('Rate limit exceeded for:', msisdn);
     //   return res.send('END Please try again after 1 minute');
     // }
 
     // // Session timeout check
-    // const isSessionValid = await checkSessionValidity(sessionId);
+    // const isSessionValid = await checkSessionValidity();
     // if (!isSessionValid) {
-    //   console.log('Session expired for:', sessionId);
+    //   console.log('Session expired for:', );
     //   return res.send('END Session expired. Please dial again');
     // }
 
@@ -61,15 +67,15 @@ exports.handleUssd = async (req, res) => {
               4. Back to main menu`;
               break;
             case '2':
-              await logUserChoice(phoneNumber, 'joke');
+              await logUserChoice(msisdn, 'joke');
               response = 'END Why did the developer go broke? Because he used up all his cache! 😄';
               break;
             case '3':
-              await logUserChoice(phoneNumber, 'quote');
+              await logUserChoice(msisdn, 'quote');
               response = 'END "Be the change you wish to see in the world" - Gandhi';
               break;
             case '4':
-              await logUserChoice(phoneNumber, 'exit');
+              await logUserChoice(msisdn, 'exit');
               response = 'END Thanks for testing! Come back soon! 👋';
               break;
             default:
@@ -80,15 +86,15 @@ exports.handleUssd = async (req, res) => {
           if (textArray[0] === '1') {
             switch(textArray[1]) {
               case '1':
-                await logUserChoice(phoneNumber, 'number_game');
+                await logUserChoice(msisdn, 'number_game');
                 response = `END I\'m thinking of number 7 Did you guess it? 🎲`;
                 break;
               case '2':
-                await logUserChoice(phoneNumber, 'rps_game');
+                await logUserChoice(msisdn, 'rps_game');
                 response = 'END Paper beats Rock! I win! 🎮';
                 break;
               case '3':
-                await logUserChoice(phoneNumber, 'math_game');
+                await logUserChoice(msisdn, 'math_game');
                 response = 'END Quick Math: 2 + 2 = 4, minus 1 that\'s 3! 🧮';
                 break;
               case '4':
@@ -109,26 +115,25 @@ exports.handleUssd = async (req, res) => {
     }
 
     // Log successful interaction
-    await logUssdInteraction(sessionId, phoneNumber, text, response);
+    await logUssdInteraction(serviceCode, msisdn, text, response);
 
   } catch (error) {
     console.log('USSD Error:', {
       error: error.message,
-      phoneNumber,
-      sessionId,
+      msisdn,
+      serviceCode,
       text
     });
     response = 'END System error. Please try again later';
     
     // Alert monitoring system
-    await alertSystemError(error, phoneNumber);
+    await alertSystemError(error, msisdn);
   }
 
   // Set response headers
   res.set({
     'Content-Type': 'text/plain',
     'Cache-Control': 'no-cache',
-    'X-Session-ID': sessionId
   });
 
   // Send response with retry mechanism
@@ -141,27 +146,27 @@ exports.handleUssd = async (req, res) => {
 };
 
 // // Helper functions
-// async function checkRateLimit(phoneNumber) {
+// async function checkRateLimit(msisdn) {
 //   // Implement rate limiting logic
 //   return false;
 // }
 
-// async function checkSessionValidity(sessionId) {
+// async function checkSessionValidity() {
 //   // Implement session validation logic
 //   return true;
 // }
 
-async function logUserChoice(phoneNumber, choice) {
+async function logUserChoice(msisdn, choice) {
   // Implement user choice logging
-  console.log('User choice:', { phoneNumber, choice });
+  console.log('User choice:', { msisdn, choice });
 }
 
-async function logUssdInteraction(sessionId, phoneNumber, input, output) {
+async function logUssdInteraction(serviceCode, msisdn, input, output) {
   // Implement interaction logging
-  console.log('USSD Interaction:', { sessionId, phoneNumber, input, output });
+  console.log('USSD Interaction:', { serviceCode, msisdn, input, output });
 }
 
-async function alertSystemError(error, phoneNumber) {
+async function alertSystemError(error, msisdn) {
   // Implement error alerting system
-  console.log('System Alert:', { error, phoneNumber });
+  console.log('System Alert:', { error, msisdn });
 }
