@@ -25,6 +25,7 @@ exports.handleUssd = async (req, res) => {
       response.messageType = 1;
       response.ussdString = `Hello`;
       console.log("USSD Response:", response);
+      console.log('-----------USSD Response ---------');
       return res.json(response);
     }
 
