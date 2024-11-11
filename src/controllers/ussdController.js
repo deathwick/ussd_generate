@@ -2,8 +2,8 @@
 
 
 exports.handleUssd = async (req, res) => {
-  console.log('Received USSD request:', req.body);
   console.log('-----------Received USSD ---------');
+  console.log('Received USSD request:', req.body);
   const { messageType, msisdn, serviceCode, ussdString } = req.body;
   let response = {
     messageType: messageType,
@@ -24,8 +24,8 @@ exports.handleUssd = async (req, res) => {
     if (messageType == 0) {
       response.messageType = 1;
       response.ussdString = `Hello`;
-      console.log("USSD Response:", response);
       console.log('-----------USSD Response ---------');
+      console.log("USSD Response:", response);
       return res.json(response);
     }
 
