@@ -24,6 +24,7 @@ exports.handleUssd = async (req, res) => {
     if (messageType == 0) {
       response.messageType = 1;
       response.ussdString = `Welcome To`;
+      response.ussdString = `Welcome to Brivas Games \n Choose your game:\n1. Guess the number\n2. Rock, Paper, Scissors\n3. Quick Math\n4. Back\n\nSelect an option: `;
       console.log('-----------USSD Response ---------');
       console.log("USSD Response:", response);
       return res.status(201).json(response);
