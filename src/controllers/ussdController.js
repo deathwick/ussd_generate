@@ -26,7 +26,7 @@ exports.handleUssd = async (req, res) => {
       response.ussdString = `Welcome To`;
       console.log('-----------USSD Response ---------');
       console.log("USSD Response:", response);
-      return res.json(response);
+      return res.status(201).json(response);
     }
 
     // Continue session
@@ -64,14 +64,14 @@ exports.handleUssd = async (req, res) => {
           response.ussdString = "Invalid option selected.";
       }
       console.log("USSD Response:", response);
-      return res.json(response);
+      return res.status(200).json(response);
     }
 
   } catch (error) {
     console.error('USSD Error:', error);
     response.messageType = 5;
     response.ussdString = "Timeout.";
-    return res.json(response);
+    return res.status(400).json(response);
   }
 };
 
