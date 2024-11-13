@@ -23,7 +23,7 @@ exports.handleUssd = async (req, res) => {
     // Initial session
     if (messageType == 0) {
       response.messageType = 1;
-      response.ussdString = `Welcome To`;
+      // response.ussdString = `Welcome To`;
       response.ussdString = `Welcome to Brivas Games \n Choose your game:\n1. Guess the number\n2. Rock, Paper, Scissors\n3. Quick Math\n4. Back\n\nSelect an option: `;
       console.log('-----------USSD Response ---------');
       console.log("USSD Response:", response);
@@ -37,31 +37,31 @@ exports.handleUssd = async (req, res) => {
           response.ussdString = `Choose your game:\n1. Guess the number\n2. Rock, Paper, Scissors\n3. Quick Math\n4. Back\n\nSelect an option:`;
           break;
         case '2':
-          response.messageType = 2;
+          // response.messageType = 2;
           response.ussdString = "Why did the developer go broke? Because he used up all his cache! ";
           break;
         case '3':
-          response.messageType = 2;
+          // response.messageType = 2;
           response.ussdString = '"Be the change you wish to see in the world" - Gandhi';
           break;
         case '4':
-          response.messageType = 4;
+          // response.messageType = 4;
           response.ussdString = "Session has been cancelled.";
           break;
         case '1*1':
-          response.messageType = 2;
+          // response.messageType = 2;
           response.ussdString = "I'm thinking of number 7! Did you guess it? ";
           break;
         case '1*2':
-          response.messageType = 2;
+          // response.messageType = 2;
           response.ussdString = "Paper beats Rock! I win! ";
           break;
         case '1*3':
-          response.messageType = 2;
+          // response.messageType = 2;
           response.ussdString = "Quick Math: 2 + 2 = 4, minus 1 that's 3! ";
           break;
         default:
-          response.messageType = 2;
+          // response.messageType = 2;
           response.ussdString = "Invalid option selected.";
       }
       console.log("USSD Response:", response);
